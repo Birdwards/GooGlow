@@ -101,7 +101,7 @@ class PlayState extends FlxState
 		FlxG.collide(player, level);
 		FlxG.collide(player, obstacles, function(a:FlxSprite, b:FlxSprite){killPlayer();});
 		FlxG.collide(splatEmitter, level, drawSplatOnLevel);
-		FlxG.collide(splatEmitter, obstacles, drawSplatOnSprite);
+		FlxG.collide(splatEmitter, obstacles, drawSplatOnSprite(nullObs));
 		
 		player.acceleration.x = 0;
 		if (FlxG.keys.pressed.RIGHT) {
@@ -164,23 +164,27 @@ class PlayState extends FlxState
 		a.kill();
 	}
 	
-	function drawSplatOnSprite(a:FlxSprite, b:FlxSprite):Void {
-		if (a.isTouching(FlxObject.RIGHT)) {
-			a.x += a.width;
-		} else if (a.isTouching(FlxObject.LEFT)) {
-			a.x -= a.width;
+	
+	
+	function drawSplatOnSprite(template:FlxSprite):FlxSprite->FlxSprite->Void {
+		return function (a:FlxSprite, b:FlxSprite):Void {
+			if (a.isTouching(FlxObject.RIGHT)) {
+				a.x += a.width;
+			} else if (a.isTouching(FlxObject.LEFT)) {
+				a.x -= a.width;
+			}
+			if (a.isTouching(FlxObject.DOWN)) {
+				a.y += a.height;
+			} else if (a.isTouching(FlxObject.UP)) {
+				a.y -= a.height;
+			}
+			var intersect:FlxRect = a.getHitbox().intersection(b.getHitbox());
+			if (!intersect.isEmpty) {
+				intersect.x -= b.x;
+				intersect.y -= b.y;
+				b.pixels.copyPixels(template.pixels, intersect.copyToFlash(), new Point(intersect.x,intersect.y));
+			}
+			a.kill();
 		}
-		if (a.isTouching(FlxObject.DOWN)) {
-			a.y += a.height;
-		} else if (a.isTouching(FlxObject.UP)) {
-			a.y -= a.height;
-		}
-		var intersect:FlxRect = a.getHitbox().intersection(b.getHitbox());
-		if (!intersect.isEmpty) {
-			intersect.x -= b.x;
-			intersect.y -= b.y;
-			b.pixels.copyPixels(nullObs.pixels, intersect.copyToFlash(), new Point(intersect.x,intersect.y));
-		}
-		a.kill();
 	}
 }
