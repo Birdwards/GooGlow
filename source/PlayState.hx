@@ -7,6 +7,7 @@ import flixel.FlxState;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.addons.editors.tiled.TiledTileLayer;
+import flixel.effects.particles.FlxEmitter;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
@@ -20,14 +21,19 @@ import openfl.geom.Rectangle;
 
 class PlayState extends FlxState
 {
+	static var GRAVITY:Float = 500;
+	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
 	var respawnTimer:FlxTimer;
 	
 	var player:FlxSprite;
+	var splatEmitter:FlxEmitter;
+	
 	var level:FlxTilemap;
 	var levelMask:FlxSprite;
 	var nullSprite:FlxSprite;
+	
 	var nullObs:FlxSprite;
 	var obstacles:FlxTypedGroup<FlxSprite>;
 	
@@ -68,19 +74,33 @@ class PlayState extends FlxState
 		
 		player = new FlxSprite(startPoint.x, startPoint.y);
 		player.makeGraphic(20, 20, 0xff0080ff);
-		player.acceleration.y = 500;
+		player.acceleration.y = GRAVITY;
 		player.drag.x = 500;
 		player.maxVelocity.x = 250;
 		player.maxVelocity.y = 1000;
 		add(player);
+		
+		splatEmitter = new FlxEmitter(player.x, player.y);
+		splatEmitter.setSize(player.width, player.height);
+		splatEmitter.makeParticles(4, 4, 0xff00ff00, 30);
+		splatEmitter.launchMode = FlxEmitterMode.SQUARE;
+		splatEmitter.velocity.set(-250,-250,250,250);
+		splatEmitter.acceleration.set(0,GRAVITY);
+		splatEmitter.solid = true;
+		add(splatEmitter);
 		
 		super.create();
 	}
 
 	override public function update(elapsed:Float):Void
 	{
+		splatEmitter.x = player.x;
+		splatEmitter.y = player.y;
+		
 		FlxG.collide(player, level);
 		FlxG.collide(player, obstacles, function(a:FlxSprite, b:FlxSprite){killPlayer();});
+		FlxG.collide(splatEmitter, level, drawSplatOnLevel);
+		FlxG.collide(splatEmitter, obstacles, drawSplatOnSprite);
 		
 		player.acceleration.x = 0;
 		if (FlxG.keys.pressed.RIGHT) {
@@ -94,11 +114,8 @@ class PlayState extends FlxState
 		}
 		if (FlxG.keys.justPressed.DOWN) {
 			killPlayer();
-			//what a weird way to create an alpha mask! Thank you FlxShapeDonut for the inspiration!
-			levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
-			levelMask.drawRect(player.x - player.width, player.y -player.height, player.width*3, player.height*3, 0xff000000);
-			levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
-			levelMask.pixels.copyChannel(nullSprite.pixels, maskRect, new Point(), BitmapDataChannel.GREEN, BitmapDataChannel.BLUE);
+			
+			splatEmitter.start();
 			
 			for (o in obstacles.members) {
 				var testRect:FlxRect = new FlxRect(player.x - player.width, player.y -player.height, player.width*3, player.height*3);
@@ -115,10 +132,51 @@ class PlayState extends FlxState
 	
 	function killPlayer():Void {
 		player.kill();
+		player.acceleration.x = 0;
+		player.velocity.x = 0;
+		player.velocity.y = 0;
 		respawnTimer.start(1, function(t:FlxTimer) {
 			player.x = startPoint.x;
 			player.y = startPoint.y;
 			player.revive();
 		});
+	}
+	
+	function drawSplatOnLevel(a:FlxSprite, b:FlxTilemap):Void {
+		//what a weird way to create an alpha mask! Thank you FlxShapeDonut for the inspiration!
+		levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
+		if (a.isTouching(FlxObject.RIGHT)) {
+			levelMask.drawRect(Math.round(a.x+a.width), Math.round(a.y), a.width, a.height, 0xff000000);
+		} else if (a.isTouching(FlxObject.LEFT)) {
+			levelMask.drawRect(Math.round(a.x-a.width), Math.round(a.y), a.width, a.height, 0xff000000);
+		} else if (a.isTouching(FlxObject.DOWN)) {
+			levelMask.drawRect(Math.round(a.x), Math.round(a.y+a.height), a.width, a.height, 0xff000000);
+		} else if (a.isTouching(FlxObject.UP)) {
+			levelMask.drawRect(Math.round(a.x), Math.round(a.y-a.height), a.width, a.height, 0xff000000);
+		}
+		
+		levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
+		levelMask.pixels.copyChannel(nullSprite.pixels, maskRect, new Point(), BitmapDataChannel.GREEN, BitmapDataChannel.BLUE);
+		a.kill();
+	}
+	
+	function drawSplatOnSprite(a:FlxSprite, b:FlxSprite):Void {
+		if (a.isTouching(FlxObject.RIGHT)) {
+			a.x += a.width;
+		} else if (a.isTouching(FlxObject.LEFT)) {
+			a.x -= a.width;
+		}
+		if (a.isTouching(FlxObject.DOWN)) {
+			a.y += a.height;
+		} else if (a.isTouching(FlxObject.UP)) {
+			a.y -= a.height;
+		}
+		var intersect:FlxRect = a.getHitbox().intersection(b.getHitbox());
+		if (!intersect.isEmpty) {
+			intersect.x -= b.x;
+			intersect.y -= b.y;
+			b.pixels.copyPixels(nullObs.pixels, intersect.copyToFlash(), new Point(intersect.x,intersect.y));
+		}
+		a.kill();
 	}
 }
