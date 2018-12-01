@@ -71,7 +71,8 @@ class PlayState extends FlxState
 		}
 		add(obstacles);	
 		
-		startPoint = new FlxPoint(20, 320);
+		var playerLayer:TiledObjectLayer = cast(levelData.getLayer("player"), TiledObjectLayer);
+		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
 		
 		player = new FlxSprite(startPoint.x, startPoint.y);
 		player.makeGraphic(20, 20, 0xff0080ff);
