@@ -85,7 +85,7 @@ class PlayState extends FlxState
 		splatEmitter.setSize(player.width, player.height);
 		splatEmitter.makeParticles(4, 4, 0xff00ff00, 30);
 		splatEmitter.launchMode = FlxEmitterMode.SQUARE;
-		splatEmitter.velocity.set(-SPLAT_VEL,-SPLAT_VEL,SPLAT_VEL,SPLAT_VEL);
+		//splatEmitter.velocity.set(-SPLAT_VEL,-SPLAT_VEL,SPLAT_VEL,SPLAT_VEL);
 		splatEmitter.acceleration.set(0,GRAVITY);
 		splatEmitter.solid = true;
 		add(splatEmitter);
@@ -110,11 +110,15 @@ class PlayState extends FlxState
 		if (FlxG.keys.pressed.LEFT) {
 			player.acceleration.x = -500;
 		}
-		if (FlxG.keys.justPressed.UP && player.isTouching(FlxObject.FLOOR)) {
+		if (FlxG.keys.justPressed.UP && (player.isTouching(FlxObject.FLOOR) || player.isTouching(FlxObject.LEFT) || player.isTouching(FlxObject.RIGHT))) {
 			player.velocity.y = -250;
 		}
-		if (FlxG.keys.justPressed.DOWN) {			
-			splatEmitter.velocity.set(-SPLAT_VEL+player.velocity.x,-SPLAT_VEL+player.velocity.y,SPLAT_VEL+player.velocity.x,SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet
+		if (FlxG.keys.justPressed.DOWN && player.alive) {			
+			splatEmitter.velocity.set(
+				-SPLAT_VEL+player.velocity.x,
+				-SPLAT_VEL+player.velocity.y,
+				SPLAT_VEL+player.velocity.x,
+				SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet yet
 			killPlayer();
 			
 			splatEmitter.start();
