@@ -12,6 +12,8 @@ import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.tile.FlxTilemap;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 using flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapDataChannel;
@@ -61,15 +63,26 @@ class PlayState extends FlxState
 		
 		obstacles = new FlxTypedGroup();
 		var obstacleLayer:TiledObjectLayer = cast(levelData.getLayer("obstacles"), TiledObjectLayer);
+		var obstaclePathLayer:TiledObjectLayer = cast(levelData.getLayer("obstaclePaths"), TiledObjectLayer);
+		for (op in obstaclePathLayer.objects) {
+			for (p in op.points) {
+				p.x += op.x;
+				p.y += op.y;
+			}
+		}
 		for (o in obstacleLayer.objects) {
 			var newObs:FlxSprite = new FlxSprite(o.x, o.y);
 			newObs.makeGraphic(20, 20, 0xff000000);
-			//newObs.alpha = 0.5;
-			//newObs.pixels.copyPixels(nullObs.pixels, new Rectangle(-10,-5,20,20), new Point(-10,-5));
 			newObs.immovable = true;
+			for (op in obstaclePathLayer.objects) {
+				if (op.name == o.name) {
+					FlxTween.linearPath(newObs, op.points, 100, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+					break;
+				}
+			}
 			obstacles.add(newObs);
 		}
-		add(obstacles);	
+		add(obstacles);
 		
 		var playerLayer:TiledObjectLayer = cast(levelData.getLayer("player"), TiledObjectLayer);
 		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
