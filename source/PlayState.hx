@@ -40,6 +40,10 @@ class PlayState extends FlxState
 	var nullObs:FlxSprite;
 	var obstacles:FlxTypedGroup<FlxSprite>;
 	
+	var nullPlat:FlxSprite;
+	var platforms:FlxTypedGroup<FlxSprite>;
+	var curPlatform:FlxSprite;
+	
 	override public function create():Void
 	{		
 		respawnTimer = new FlxTimer();
@@ -84,6 +88,33 @@ class PlayState extends FlxState
 		}
 		add(obstacles);
 		
+		nullPlat = new FlxSprite().makeGraphic(20, 20, 0xff0000ff);
+		
+		platforms = new FlxTypedGroup();
+		var platformLayer:TiledObjectLayer = cast(levelData.getLayer("platforms"), TiledObjectLayer);
+		var platformPathLayer:TiledObjectLayer = cast(levelData.getLayer("platformPaths"), TiledObjectLayer);
+		for (pp in platformPathLayer.objects) {
+			for (p in pp.points) {
+				p.x += pp.x;
+				p.y += pp.y;
+			}
+		}
+		for (p in platformLayer.objects) {
+			var newPlat:FlxSprite = new FlxSprite(p.x, p.y);
+			newPlat.makeGraphic(60, 10, 0xff000000);
+			newPlat.immovable = true;
+			for (pp in platformPathLayer.objects) {
+				if (pp.name == p.name) {
+					FlxTween.linearPath(newPlat, pp.points, 50, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+					break;
+				}
+			}
+			platforms.add(newPlat);
+		}
+		add(platforms);
+		
+		curPlatform = null;
+		
 		var playerLayer:TiledObjectLayer = cast(levelData.getLayer("player"), TiledObjectLayer);
 		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
 		
@@ -112,9 +143,16 @@ class PlayState extends FlxState
 		splatEmitter.x = player.x;
 		splatEmitter.y = player.y;
 		
+		if (curPlatform != null && curPlatform.last.y < curPlatform.y) {
+			player.y += curPlatform.y - curPlatform.last.y;
+		}
+		curPlatform = null;
+		
 		FlxG.collide(player, level);
+		FlxG.collide(player, platforms, function(a:FlxSprite, b:FlxSprite){if (b.isTouching(FlxObject.UP)) {curPlatform = b;}});
 		FlxG.collide(player, obstacles, function(a:FlxSprite, b:FlxSprite){killPlayer();});
 		FlxG.collide(splatEmitter, level, drawSplatOnLevel);
+		FlxG.collide(splatEmitter, platforms, drawSplatOnSprite(nullPlat));
 		FlxG.collide(splatEmitter, obstacles, drawSplatOnSprite(nullObs));
 		
 		player.acceleration.x = 0;
