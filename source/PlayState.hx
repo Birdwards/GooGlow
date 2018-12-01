@@ -22,6 +22,7 @@ import openfl.geom.Rectangle;
 class PlayState extends FlxState
 {
 	static var GRAVITY:Float = 500;
+	static var SPLAT_VEL:Float = 250;
 	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
@@ -84,7 +85,7 @@ class PlayState extends FlxState
 		splatEmitter.setSize(player.width, player.height);
 		splatEmitter.makeParticles(4, 4, 0xff00ff00, 30);
 		splatEmitter.launchMode = FlxEmitterMode.SQUARE;
-		splatEmitter.velocity.set(-250,-250,250,250);
+		splatEmitter.velocity.set(-SPLAT_VEL,-SPLAT_VEL,SPLAT_VEL,SPLAT_VEL);
 		splatEmitter.acceleration.set(0,GRAVITY);
 		splatEmitter.solid = true;
 		add(splatEmitter);
@@ -112,7 +113,8 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.UP && player.isTouching(FlxObject.FLOOR)) {
 			player.velocity.y = -250;
 		}
-		if (FlxG.keys.justPressed.DOWN) {
+		if (FlxG.keys.justPressed.DOWN) {			
+			splatEmitter.velocity.set(-SPLAT_VEL+player.velocity.x,-SPLAT_VEL+player.velocity.y,SPLAT_VEL+player.velocity.x,SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet
 			killPlayer();
 			
 			splatEmitter.start();
@@ -146,14 +148,16 @@ class PlayState extends FlxState
 		//what a weird way to create an alpha mask! Thank you FlxShapeDonut for the inspiration!
 		levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
 		if (a.isTouching(FlxObject.RIGHT)) {
-			levelMask.drawRect(Math.round(a.x+a.width), Math.round(a.y), a.width, a.height, 0xff000000);
+			a.x += a.width;
 		} else if (a.isTouching(FlxObject.LEFT)) {
-			levelMask.drawRect(Math.round(a.x-a.width), Math.round(a.y), a.width, a.height, 0xff000000);
-		} else if (a.isTouching(FlxObject.DOWN)) {
-			levelMask.drawRect(Math.round(a.x), Math.round(a.y+a.height), a.width, a.height, 0xff000000);
-		} else if (a.isTouching(FlxObject.UP)) {
-			levelMask.drawRect(Math.round(a.x), Math.round(a.y-a.height), a.width, a.height, 0xff000000);
+			a.x -= a.width;
 		}
+		if (a.isTouching(FlxObject.DOWN)) {
+			a.y += a.height;
+		} else if (a.isTouching(FlxObject.UP)) {
+			a.y -= a.height;
+		}
+		levelMask.drawRect(Math.round(a.x), Math.round(a.y), a.width, a.height, 0xff000000);
 		
 		levelMask.pixels.copyChannel(levelMask.pixels, maskRect, new Point(), BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
 		levelMask.pixels.copyChannel(nullSprite.pixels, maskRect, new Point(), BitmapDataChannel.GREEN, BitmapDataChannel.BLUE);
