@@ -25,10 +25,12 @@ class PlayState extends FlxState
 {
 	static var GRAVITY:Float = 500;
 	static var SPLAT_VEL:Float = 250;
+	static var NUM_LIVES:Int = 5;
 	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
 	var respawnTimer:FlxTimer;
+	var livesLeft:Int;
 	
 	var player:FlxSprite;
 	var splatEmitter:FlxEmitter;
@@ -47,6 +49,7 @@ class PlayState extends FlxState
 	override public function create():Void
 	{		
 		respawnTimer = new FlxTimer();
+		livesLeft = NUM_LIVES;
 		
 		var levelData:TiledMap = new TiledMap("assets/data/testmap.tmx");
 		var someLayer:TiledTileLayer = cast(levelData.getLayer("main"), TiledTileLayer);
@@ -130,7 +133,6 @@ class PlayState extends FlxState
 		splatEmitter.setSize(player.width, player.height);
 		splatEmitter.makeParticles(4, 4, 0xff00ff00, 30);
 		splatEmitter.launchMode = FlxEmitterMode.SQUARE;
-		//splatEmitter.velocity.set(-SPLAT_VEL,-SPLAT_VEL,SPLAT_VEL,SPLAT_VEL);
 		splatEmitter.acceleration.set(0,GRAVITY);
 		splatEmitter.solid = true;
 		add(splatEmitter);
@@ -170,7 +172,7 @@ class PlayState extends FlxState
 				-SPLAT_VEL+player.velocity.x,
 				-SPLAT_VEL+player.velocity.y,
 				SPLAT_VEL+player.velocity.x,
-				SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet yet
+				player.velocity.y); //SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet yet
 			killPlayer();
 			
 			splatEmitter.start();
@@ -193,11 +195,18 @@ class PlayState extends FlxState
 		player.acceleration.x = 0;
 		player.velocity.x = 0;
 		player.velocity.y = 0;
-		respawnTimer.start(1, function(t:FlxTimer) {
-			player.x = startPoint.x;
-			player.y = startPoint.y;
-			player.revive();
-		});
+		livesLeft -= 1;
+		if (livesLeft > 0) {
+			respawnTimer.start(1, function(t:FlxTimer) {
+				player.x = startPoint.x;
+				player.y = startPoint.y;
+				player.revive();
+			});
+		} else {
+			respawnTimer.start(1, function(t:FlxTimer) {
+				FlxG.resetState();
+			});
+		}
 	}
 	
 	function drawSplatOnLevel(a:FlxSprite, b:FlxTilemap):Void {
