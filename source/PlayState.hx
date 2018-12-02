@@ -296,11 +296,14 @@ class PlayState extends FlxState
 		}
 		if (FlxG.keys.justPressed.UP) {
 			if (player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3)) {
+				Sounds.jump.play();
 				player.velocity.y = -JUMP_VEL;
 			} else if (player.isTouching(FlxObject.LEFT) && (curTut == -1 || curTut >= 5)) {
+				Sounds.jump.play();
 				player.velocity.y = -JUMP_VEL;
 				player.velocity.x = 150;
 			} else if (player.isTouching(FlxObject.RIGHT) && (curTut == -1 || curTut >= 5)) {
+				Sounds.jump.play();
 				player.velocity.y = -JUMP_VEL;
 				player.velocity.x = -150;
 			}
@@ -313,6 +316,7 @@ class PlayState extends FlxState
 			if (curTut == 4) {
 				nextTut();
 			}
+			Sounds.explode.play();
 					
 			splatEmitter.velocity.set(
 				-SPLAT_VEL+player.velocity.x,
@@ -411,6 +415,7 @@ class PlayState extends FlxState
 	
 	function exitLevel(a:FlxSprite, b:FlxSprite):Void {
 		if (a.x >= b.x && a.x + a.width <= b.x + b.width && a.y >= b.y && a.y + a.height <= b.y + b.height) {
+			Sounds.exit.play();
 			a.kill();
 			//todo: increment level
 			respawnTimer.start(1, function(t:FlxTimer) {
@@ -424,6 +429,7 @@ class PlayState extends FlxState
 			nextTut();			
 			tutBox.visible = true;
 		}
+		Sounds.die.play();
 		playerPoof.x = player.x;
 		playerPoof.y = player.y;
 		playerPoof.visible = true;
