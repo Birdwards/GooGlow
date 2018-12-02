@@ -12,7 +12,7 @@ class SplatParticle extends FlxParticle {
 		if (rando == null) {
 			rando = new FlxRandom();
 		}
-		var randSize:Int = rando.int(1, 8);
+		var randSize:Int = rando.int(2, 8);
 		makeGraphic(randSize, randSize, 0xff80ff00);
 	}
 }

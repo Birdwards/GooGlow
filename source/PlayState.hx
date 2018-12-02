@@ -6,12 +6,14 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.tiled.TiledLayer;
 import flixel.addons.editors.tiled.TiledMap;
+import flixel.addons.editors.tiled.TiledObject;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.effects.particles.FlxEmitter;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.text.FlxBitmapText;
 import flixel.tile.FlxBaseTilemap;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxEase;
@@ -28,6 +30,7 @@ class PlayState extends FlxState
 	static var GRAVITY:Float = 500;
 	static var SPLAT_VEL:Float = 250;
 	static var NUM_LIVES:Int = 20;
+	static var TUT_WIDTH:Int = 200;
 	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
@@ -51,6 +54,12 @@ class PlayState extends FlxState
 	
 	var exit:FlxSprite;
 	
+	var tutText:FlxTypedGroup<FlxBitmapText>;
+	var tutBox:FlxSprite;
+	var tutCollision4:FlxSprite;
+	var tutCollision6:FlxSprite;
+	var curTut:Int;
+	
 	override public function create():Void
 	{		
 		respawnTimer = new FlxTimer();
@@ -70,6 +79,11 @@ class PlayState extends FlxState
 		
 		nullSprite = new FlxSprite();
 		nullSprite.makeGraphic(Math.round(level.width), Math.round(level.height), 0);
+		
+		var exitLayer:TiledObjectLayer = getObjectLayer("exit");
+		exit = new FlxSprite(exitLayer.objects[0].x, exitLayer.objects[0].y);
+		exit.makeGraphic(20, 20, 0xffffffff);
+		add(exit);
 		
 		nullObs = new FlxSprite().makeGraphic(20, 20, 0xffff0000);
 		
@@ -135,10 +149,44 @@ class PlayState extends FlxState
 		
 		curPlatform = null;
 		
-		var exitLayer:TiledObjectLayer = getObjectLayer("exit");
-		exit = new FlxSprite(exitLayer.objects[0].x, exitLayer.objects[0].y);
-		exit.makeGraphic(20, 20, 0xffffffff);
-		add(exit);
+		var tutLayer:TiledObjectLayer = getObjectLayer("tutText");
+		tutText = new FlxTypedGroup();
+		if (tutLayer != null) {
+			tutLayer.objects.sort( function(a:TiledObject, b:TiledObject):Int {
+				return Std.parseInt(a.name) - Std.parseInt(b.name);
+			});
+			for (t in tutLayer.objects) {
+				var tempText:FlxBitmapText = new FlxBitmapText(Fonts.defaultFont);
+				tempText.autoSize = false;
+				tempText.fieldWidth = TUT_WIDTH;
+				tempText.alignment = "center";
+				tempText.text = t.properties.get("caption");
+				tempText.x = t.x + (t.width-TUT_WIDTH)*0.5;
+				tempText.y = t.y - tempText.height - 20;
+				tempText.visible = false;
+				tutText.add(tempText);
+			}
+			add(tutText);
+			curTut = 0;
+			tutText.members[curTut].visible = true;
+			
+			tutBox = new FlxSprite(tutLayer.objects[1].x, tutLayer.objects[1].y, "assets/images/tutBox.png");
+			tutBox.visible = false;
+			add(tutBox);
+			
+			tutCollision4 = new FlxSprite(tutLayer.objects[4].x, tutLayer.objects[4].y);
+			tutCollision4.makeGraphic(tutLayer.objects[4].width, tutLayer.objects[4].height, 0);
+			add(tutCollision4);
+			
+			tutCollision6 = new FlxSprite(tutLayer.objects[6].x, tutLayer.objects[6].y);
+			tutCollision6.makeGraphic(tutLayer.objects[6].width, tutLayer.objects[6].height, 0);
+			add(tutCollision6);
+		} else {
+			tutBox = new FlxSprite();
+			tutCollision4 = new FlxSprite();
+			tutCollision6 = new FlxSprite();
+			curTut = -1;
+		}
 		
 		var playerLayer:TiledObjectLayer = getObjectLayer("player");
 		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
@@ -181,11 +229,23 @@ class PlayState extends FlxState
 		
 		FlxG.collide(player, level);
 		FlxG.collide(player, platforms, function(a:FlxSprite, b:FlxSprite){if (b.isTouching(FlxObject.UP)) {curPlatform = b;}});
-		FlxG.collide(player, obstacles, function(a:FlxSprite, b:FlxSprite){killPlayer();});
+		FlxG.collide(player, obstacles, playerHitSpike);
 		FlxG.overlap(player, exit, exitLevel);
 		FlxG.collide(splatEmitter, level, drawSplatOnLevel);
 		FlxG.collide(splatEmitter, platforms, drawSplatOnSprite(nullPlat));
 		FlxG.collide(splatEmitter, obstacles, drawSplatOnSprite(nullObs));
+		
+		if (curTut == 1 && FlxG.overlap(player, tutBox)) {
+			nextTut();
+		}
+		
+		if (curTut == 3 && FlxG.overlap(player, tutCollision4)) {
+			nextTut();
+		}
+		
+		if (curTut == 5 && FlxG.overlap(player, tutCollision6)) {
+			nextTut();
+		}
 		
 		player.acceleration.x = 0;
 		if (FlxG.keys.pressed.RIGHT) {
@@ -194,10 +254,20 @@ class PlayState extends FlxState
 		if (FlxG.keys.pressed.LEFT) {
 			player.acceleration.x = -500;
 		}
-		if (FlxG.keys.justPressed.UP && (player.isTouching(FlxObject.FLOOR) || player.isTouching(FlxObject.LEFT) || player.isTouching(FlxObject.RIGHT))) {
+		if (FlxG.keys.justPressed.UP &&
+			((player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3))
+			|| ((curTut == -1 || curTut >= 5) && (player.isTouching(FlxObject.LEFT) || player.isTouching(FlxObject.RIGHT))))) {
 			player.velocity.y = -250;
 		}
-		if (FlxG.keys.justPressed.DOWN && player.alive) {			
+		if (FlxG.keys.justPressed.DOWN && player.alive && (curTut == -1 || curTut >= 2)) {	
+			if (curTut == 2) {
+				nextTut();
+				tutBox.visible = false;
+			}
+			if (curTut == 4) {
+				nextTut();
+			}
+					
 			splatEmitter.velocity.set(
 				-SPLAT_VEL+player.velocity.x,
 				-SPLAT_VEL+player.velocity.y,
@@ -217,6 +287,7 @@ class PlayState extends FlxState
 				}
 			}
 		}
+		
 		super.update(elapsed);
 	}
 	
@@ -299,5 +370,19 @@ class PlayState extends FlxState
 				FlxG.resetState();
 			});
 		}		
+	}
+	
+	function playerHitSpike(a:FlxSprite, b:FlxSprite):Void {
+		if (curTut == 0) {
+			nextTut();			
+			tutBox.visible = true;
+		}
+		killPlayer();
+	}
+	
+	function nextTut():Void {
+		tutText.members[curTut].visible = false;
+		curTut += 1;
+		tutText.members[curTut].visible = true;
 	}
 }

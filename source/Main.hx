@@ -10,6 +10,7 @@ class Main extends Sprite
 	{
 		super();
 		
+		FlxG.signals.preGameStart.add(Fonts.init);
 		addChild(new FlxGame(640, 360, PlayState, true, true));
 		
 		FlxG.autoPause = false;
