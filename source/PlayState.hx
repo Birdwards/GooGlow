@@ -70,7 +70,7 @@ class PlayState extends FlxState
 		respawnTimer = new FlxTimer();
 		livesLeft = NUM_LIVES;
 		
-		levelData = new TiledMap("assets/data/level1.tmx");
+		levelData = new TiledMap("assets/data/level" + Reg.curLevel + ".tmx");
 		var someLayer:TiledTileLayer = cast(levelData.getLayer("main"), TiledTileLayer);
 		
 		level = new FlxTilemap();
@@ -287,56 +287,59 @@ class PlayState extends FlxState
 			nextTut();
 		}
 		
-		player.acceleration.x = 0;
-		if (FlxG.keys.pressed.RIGHT) {
-			player.acceleration.x = 500;
-		}
-		if (FlxG.keys.pressed.LEFT) {
-			player.acceleration.x = -500;
-		}
-		if (FlxG.keys.justPressed.UP) {
-			if (player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3)) {
-				Sounds.jump.play();
-				player.velocity.y = -JUMP_VEL;
-			} else if (player.isTouching(FlxObject.LEFT) && (curTut == -1 || curTut >= 5)) {
-				Sounds.jump.play();
-				player.velocity.y = -JUMP_VEL;
-				player.velocity.x = 150;
-			} else if (player.isTouching(FlxObject.RIGHT) && (curTut == -1 || curTut >= 5)) {
-				Sounds.jump.play();
-				player.velocity.y = -JUMP_VEL;
-				player.velocity.x = -150;
+		if (player.alive) {
+			player.acceleration.x = 0;
+			if (FlxG.keys.pressed.RIGHT) {
+				player.acceleration.x = 500;
 			}
-		}
-		if (FlxG.keys.justPressed.DOWN && player.alive && (curTut == -1 || curTut >= 2)) {	
-			if (curTut == 2) {
-				nextTut();
-				tutBox.visible = false;
+			if (FlxG.keys.pressed.LEFT) {
+				player.acceleration.x = -500;
 			}
-			if (curTut == 4) {
-				nextTut();
-			}
-			Sounds.explode.play();
-					
-			splatEmitter.velocity.set(
-				-SPLAT_VEL+player.velocity.x,
-				-SPLAT_VEL+player.velocity.y,
-				SPLAT_VEL+player.velocity.x,
-				player.velocity.y); //SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet yet
-			killPlayer();
-			
-			splatEmitter.start();
-			
-			for (o in obstacles.members) {
-				var testRect:FlxRect = new FlxRect(player.x - player.width, player.y -player.height, player.width*3, player.height*3);
-				var intersect:FlxRect = testRect.intersection(o.getHitbox());
-				if (!intersect.isEmpty) {
-					intersect.x -= o.x;
-					intersect.y -= o.y;
-					o.pixels.copyPixels(nullObs.pixels, intersect.copyToFlash(), new Point(intersect.x,intersect.y));
+			if (FlxG.keys.justPressed.UP) {
+				if (player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3)) {
+					Sounds.jump.play();
+					player.velocity.y = -JUMP_VEL;
+				} else if (player.isTouching(FlxObject.LEFT) && (curTut == -1 || curTut >= 5)) {
+					Sounds.jump.play();
+					player.velocity.y = -JUMP_VEL;
+					player.velocity.x = 150;
+				} else if (player.isTouching(FlxObject.RIGHT) && (curTut == -1 || curTut >= 5)) {
+					Sounds.jump.play();
+					player.velocity.y = -JUMP_VEL;
+					player.velocity.x = -150;
 				}
 			}
-		}
+			if (FlxG.keys.justPressed.DOWN && (curTut == -1 || curTut >= 2)) {	
+				if (curTut == 2) {
+					nextTut();
+					tutBox.visible = false;
+				}
+				if (curTut == 4) {
+					nextTut();
+				}
+				Sounds.explode.play();
+						
+				splatEmitter.velocity.set(
+					-SPLAT_VEL+player.velocity.x,
+					-SPLAT_VEL+player.velocity.y,
+					SPLAT_VEL+player.velocity.x,
+					player.velocity.y); //SPLAT_VEL+player.velocity.y); //this needs to be called before killPlayer, so velocity isn't reset yet yet
+				killPlayer();
+				
+				splatEmitter.start();
+				
+				for (o in obstacles.members) {
+					var testRect:FlxRect = new FlxRect(player.x - player.width, player.y -player.height, player.width*3, player.height*3);
+					var intersect:FlxRect = testRect.intersection(o.getHitbox());
+					if (!intersect.isEmpty) {
+						intersect.x -= o.x;
+						intersect.y -= o.y;
+						o.pixels.copyPixels(nullObs.pixels, intersect.copyToFlash(), new Point(intersect.x,intersect.y));
+					}
+				} //end for obstacles.members
+			} //end if just pressed down
+		} //end if player alive
+		
 		
 		super.update(elapsed);
 	}
@@ -417,10 +420,12 @@ class PlayState extends FlxState
 		if (a.x >= b.x && a.x + a.width <= b.x + b.width && a.y >= b.y && a.y + a.height <= b.y + b.height) {
 			Sounds.exit.play();
 			a.kill();
-			//todo: increment level
-			respawnTimer.start(1, function(t:FlxTimer) {
-				FlxG.resetState();
-			});
+			if (Reg.curLevel < Reg.NUM_LEVELS) {
+				Reg.curLevel += 1;
+				respawnTimer.start(1, function(t:FlxTimer) {
+					FlxG.resetState();
+				});
+			} //todo: else, finish game!
 		}		
 	}
 	
