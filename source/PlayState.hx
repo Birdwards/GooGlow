@@ -40,6 +40,7 @@ class PlayState extends FlxState
 	
 	var player:FlxSprite;
 	var splatEmitter:FlxEmitter;
+	var playerPoof:FlxSprite;
 	
 	var levelData:TiledMap;
 	var level:FlxTilemap;
@@ -82,11 +83,6 @@ class PlayState extends FlxState
 		
 		nullSprite = new FlxSprite();
 		nullSprite.makeGraphic(Math.round(level.width), Math.round(level.height), 0);
-		
-		var exitLayer:TiledObjectLayer = getObjectLayer("exit");
-		exit = new FlxSprite(exitLayer.objects[0].x, exitLayer.objects[0].y);
-		exit.makeGraphic(20, 20, 0xffffffff);
-		add(exit);
 		
 		nullObs = new FlxSprite(0, 0, "assets/images/spike.png");
 		
@@ -206,9 +202,35 @@ class PlayState extends FlxState
 		player.maxVelocity.y = 1000;
 		add(player);
 		
+		playerPoof = new FlxSprite();
+		playerPoof.loadGraphic("assets/images/poof.png", true, 20, 20);
+		playerPoof.animation.add("poof", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 60, false);
+		playerPoof.visible = false;
+		playerPoof.animation.finishCallback = function(name:String):Void {
+			playerPoof.visible = false;
+		}
+		playerPoof.width = player.width;
+		playerPoof.height = player.height;
+		playerPoof.offset.x = player.offset.x;
+		playerPoof.offset.y = player.offset.y;
+		add(playerPoof);
+		
+		var exitLayer:TiledObjectLayer = getObjectLayer("exit");
+		exit = new FlxSprite(exitLayer.objects[0].x, exitLayer.objects[0].y, "assets/images/exit.png");
+		add(exit);
+		
+		var exitEmitter = new FlxEmitter(exit.x, exit.y + exit.height - 2);
+		exitEmitter.setSize(exit.width, 1);
+		exitEmitter.makeParticles(1, 1, 0xffffffff, 15);
+		exitEmitter.launchMode = FlxEmitterMode.SQUARE;
+		exitEmitter.velocity.set(0);
+		exitEmitter.acceleration.set(0,-20);
+		exitEmitter.lifespan.set(1.3);
+		exitEmitter.start(false, 0.1);
+		add(exitEmitter);
+		
 		splatEmitter = new FlxEmitter(player.x, player.y);
 		splatEmitter.setSize(player.width, player.height);
-		//splatEmitter.makeParticles(4, 4, 0xff00ff00, 30);
 		for (i in 0...30) {
 		  splatEmitter.add(new SplatParticle());
 		}
@@ -395,6 +417,10 @@ class PlayState extends FlxState
 			nextTut();			
 			tutBox.visible = true;
 		}
+		playerPoof.x = player.x;
+		playerPoof.y = player.y;
+		playerPoof.visible = true;
+		playerPoof.animation.play("poof");
 		killPlayer();
 	}
 	
