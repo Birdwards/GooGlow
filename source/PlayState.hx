@@ -119,7 +119,7 @@ class PlayState extends FlxState
 		}		
 		add(obstacles);
 		
-		nullPlat = new FlxSprite().makeGraphic(20, 20, 0xff0000ff);
+		nullPlat = new FlxSprite(0, 0, "assets/images/platform.png");
 		
 		platforms = new FlxTypedGroup();
 		var platformLayer:TiledObjectLayer = getObjectLayer("platforms");
@@ -135,7 +135,7 @@ class PlayState extends FlxState
 		if (platformLayer != null) {
 			for (p in platformLayer.objects) {
 				var newPlat:FlxSprite = new FlxSprite(p.x, p.y);
-				newPlat.makeGraphic(60, 10, 0xff000000, true);
+				newPlat.makeGraphic(60, 8, 0xff000000, true);
 				newPlat.immovable = true;
 				if (platformPathLayer != null) {
 					for (pp in platformPathLayer.objects) {
