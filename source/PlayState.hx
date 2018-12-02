@@ -28,6 +28,7 @@ import openfl.geom.Rectangle;
 class PlayState extends FlxState
 {
 	static var GRAVITY:Float = 500;
+	static var JUMP_VEL:Float = 250;
 	static var SPLAT_VEL:Float = 250;
 	static var NUM_LIVES:Int = 20;
 	static var TUT_WIDTH:Int = 200;
@@ -293,10 +294,16 @@ class PlayState extends FlxState
 		if (FlxG.keys.pressed.LEFT) {
 			player.acceleration.x = -500;
 		}
-		if (FlxG.keys.justPressed.UP &&
-			((player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3))
-			|| ((curTut == -1 || curTut >= 5) && (player.isTouching(FlxObject.LEFT) || player.isTouching(FlxObject.RIGHT))))) {
-			player.velocity.y = -250;
+		if (FlxG.keys.justPressed.UP) {
+			if (player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3)) {
+				player.velocity.y = -JUMP_VEL;
+			} else if (player.isTouching(FlxObject.LEFT) && (curTut == -1 || curTut >= 5)) {
+				player.velocity.y = -JUMP_VEL;
+				player.velocity.x = 150;
+			} else if (player.isTouching(FlxObject.RIGHT) && (curTut == -1 || curTut >= 5)) {
+				player.velocity.y = -JUMP_VEL;
+				player.velocity.x = -150;
+			}
 		}
 		if (FlxG.keys.justPressed.DOWN && player.alive && (curTut == -1 || curTut >= 2)) {	
 			if (curTut == 2) {
