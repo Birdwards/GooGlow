@@ -88,7 +88,7 @@ class PlayState extends FlxState
 		exit.makeGraphic(20, 20, 0xffffffff);
 		add(exit);
 		
-		nullObs = new FlxSprite().makeGraphic(20, 20, 0xffff0000);
+		nullObs = new FlxSprite(0, 0, "assets/images/spike.png");
 		
 		obstacles = new FlxTypedGroup();
 		var obstacleLayer:TiledObjectLayer = getObjectLayer("obstacles");
