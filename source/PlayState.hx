@@ -31,6 +31,7 @@ class PlayState extends FlxState
 	static var SPLAT_VEL:Float = 250;
 	static var NUM_LIVES:Int = 20;
 	static var TUT_WIDTH:Int = 200;
+	static var DISABLE_TUT:Bool = true;
 	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
@@ -59,6 +60,8 @@ class PlayState extends FlxState
 	var tutCollision4:FlxSprite;
 	var tutCollision6:FlxSprite;
 	var curTut:Int;
+	
+	var slimeIcons:FlxTypedGroup<FlxSprite>;
 	
 	override public function create():Void
 	{		
@@ -151,7 +154,7 @@ class PlayState extends FlxState
 		
 		var tutLayer:TiledObjectLayer = getObjectLayer("tutText");
 		tutText = new FlxTypedGroup();
-		if (tutLayer != null) {
+		if (tutLayer != null && !DISABLE_TUT) {
 			tutLayer.objects.sort( function(a:TiledObject, b:TiledObject):Int {
 				return Std.parseInt(a.name) - Std.parseInt(b.name);
 			});
@@ -192,11 +195,11 @@ class PlayState extends FlxState
 		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
 		
 		player = new FlxSprite(startPoint.x, startPoint.y);
-		player.makeGraphic(20, 20, 0xff0080ff);
+		player.loadGraphic("assets/images/slime.png");
 		player.width = 16;
 		player.height = 16;
 		player.offset.x = 2;
-		player.offset.y = 4;
+		player.offset.y = 2;
 		player.acceleration.y = GRAVITY;
 		player.drag.x = 500;
 		player.maxVelocity.x = 250;
@@ -213,6 +216,20 @@ class PlayState extends FlxState
 		splatEmitter.acceleration.set(0,GRAVITY);
 		splatEmitter.solid = true;
 		add(splatEmitter);
+		
+		var slimeIconText:FlxBitmapText = new FlxBitmapText(Fonts.defaultFont);
+		slimeIconText.text = "Slimes left:";
+		slimeIconText.x = 1;
+		slimeIconText.y = (20 - slimeIconText.height) * 0.5;
+		add(slimeIconText);
+		slimeIcons = new FlxTypedGroup();
+		for (i in 0...NUM_LIVES) {
+		  slimeIcons.add(new FlxSprite(
+				i*11 + slimeIconText.x + slimeIconText.width,
+				slimeIconText.y + 4,
+				"assets/images/slimeIcon.png"));
+		}
+		add(slimeIcons);
 		
 		super.create();
 	}
@@ -297,6 +314,7 @@ class PlayState extends FlxState
 		player.velocity.x = 0;
 		player.velocity.y = 0;
 		livesLeft -= 1;
+		slimeIcons.members[livesLeft].kill();
 		if (livesLeft > 0) {
 			respawnTimer.start(1, function(t:FlxTimer) {
 				player.x = startPoint.x;
