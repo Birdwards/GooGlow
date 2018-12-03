@@ -1,5 +1,6 @@
 package;
 
+import flash.system.System;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.util.FlxTimer;
@@ -21,6 +22,12 @@ class MyState extends FlxState {
 	{
 		FlxG.camera.fade(0xff000000, 0.5, function() {
 			FlxG.resetState();
+		});
+	}
+	
+	function quit():Void {
+		FlxG.camera.fade(0xff000000, 0.5, function() {
+			System.exit(0);
 		});
 	}
 }

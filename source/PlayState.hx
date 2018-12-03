@@ -32,7 +32,7 @@ class PlayState extends MyState
 	static var SPLAT_VEL:Float = 250;
 	static var NUM_LIVES:Int = 20;
 	static var TUT_WIDTH:Int = 200;
-	static var DISABLE_TUT:Bool = true;
+	static var DISABLE_TUT:Bool = false;
 	
 	var maskRect:Rectangle;
 	var startPoint:FlxPoint;
@@ -205,7 +205,7 @@ class PlayState extends MyState
 		startPoint = new FlxPoint(playerLayer.objects[0].x + 2, playerLayer.objects[0].y + 4);
 		
 		player = new FlxSprite(startPoint.x, startPoint.y);
-		player.loadGraphic("assets/images/slime.png");
+		player.loadGraphic("assets/images/slime.png", true, 20, 20);
 		player.width = 16;
 		player.height = 16;
 		player.offset.x = 2;
@@ -214,6 +214,9 @@ class PlayState extends MyState
 		player.drag.x = 500;
 		player.maxVelocity.x = 250;
 		player.maxVelocity.y = 1000;
+		player.animation.add("turnLeft", [0,1,2,3,4,5,6], 30, false);
+		player.animation.add("turnRight", [6,5,4,3,2,1,0], 30, false);
+		player.facing = FlxObject.RIGHT;
 		add(player);
 		
 		playerPoof = new FlxSprite();
@@ -309,6 +312,13 @@ class PlayState extends MyState
 			}
 			if (FlxG.keys.pressed.LEFT) {
 				player.acceleration.x = -500;
+			}
+			if (player.acceleration.x > 0 && player.facing == FlxObject.LEFT) {
+				player.facing = FlxObject.RIGHT;
+				player.animation.play("turnRight");
+			} else if (player.acceleration.x < 0 && player.facing == FlxObject.RIGHT) {
+				player.facing = FlxObject.LEFT;
+				player.animation.play("turnLeft");
 			}
 			if (FlxG.keys.justPressed.UP) {
 				if (player.isTouching(FlxObject.FLOOR) && (curTut == -1 || curTut >= 3)) {
@@ -438,7 +448,11 @@ class PlayState extends MyState
 			if (Reg.curLevel < Reg.NUM_LEVELS) {
 				Reg.curLevel += 1;
 				respawnTimer.start(1, reset);
-			} //todo: else, finish game!
+			} else {
+				respawnTimer.start(1, function(t:FlxTimer) {
+					switchState(new EndState());
+				});
+			}
 		}		
 	}
 	
