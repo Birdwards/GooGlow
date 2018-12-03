@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="20" tileheight="20" infinite="0" nextlayerid="8" nextobjectid="145">
+ <tileset firstgid="1" source="testsheet.tsx"/>
+ <layer id="1" name="main" width="32" height="18">
+  <data encoding="csv">
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+</data>
+ </layer>
+ <objectgroup color="#ff0000" id="2" name="obstacles">
+  <object id="96" x="120" y="320" width="20" height="20"/>
+  <object id="97" x="140" y="320" width="20" height="20"/>
+  <object id="98" x="160" y="320" width="20" height="20"/>
+  <object id="99" x="180" y="320" width="20" height="20"/>
+  <object id="100" x="200" y="320" width="20" height="20"/>
+  <object id="101" x="220" y="320" width="20" height="20"/>
+  <object id="102" x="240" y="320" width="20" height="20"/>
+  <object id="103" x="260" y="320" width="20" height="20"/>
+  <object id="104" x="280" y="320" width="20" height="20"/>
+  <object id="105" x="300" y="320" width="20" height="20"/>
+  <object id="106" x="320" y="320" width="20" height="20"/>
+  <object id="107" x="340" y="320" width="20" height="20"/>
+  <object id="108" x="360" y="320" width="20" height="20"/>
+  <object id="109" x="380" y="320" width="20" height="20"/>
+  <object id="110" x="400" y="320" width="20" height="20"/>
+  <object id="111" x="420" y="320" width="20" height="20"/>
+  <object id="112" x="440" y="320" width="20" height="20"/>
+  <object id="113" x="460" y="320" width="20" height="20"/>
+  <object id="114" x="480" y="320" width="20" height="20"/>
+  <object id="115" x="500" y="320" width="20" height="20"/>
+  <object id="116" x="120" y="60" width="20" height="20"/>
+  <object id="117" x="120" y="20" width="20" height="20"/>
+  <object id="118" x="120" y="40" width="20" height="20"/>
+  <object id="119" x="500" y="60" width="20" height="20"/>
+  <object id="120" x="500" y="20" width="20" height="20"/>
+  <object id="121" x="500" y="40" width="20" height="20"/>
+  <object id="129" x="120" y="200" width="20" height="20"/>
+  <object id="130" x="120" y="160" width="20" height="20"/>
+  <object id="131" x="120" y="180" width="20" height="20"/>
+  <object id="132" x="120" y="260" width="20" height="20"/>
+  <object id="133" x="120" y="220" width="20" height="20"/>
+  <object id="134" x="120" y="240" width="20" height="20"/>
+  <object id="135" x="120" y="280" width="20" height="20"/>
+  <object id="136" x="120" y="300" width="20" height="20"/>
+  <object id="137" x="500" y="200" width="20" height="20"/>
+  <object id="138" x="500" y="160" width="20" height="20"/>
+  <object id="139" x="500" y="180" width="20" height="20"/>
+  <object id="140" x="500" y="260" width="20" height="20"/>
+  <object id="141" x="500" y="220" width="20" height="20"/>
+  <object id="142" x="500" y="240" width="20" height="20"/>
+  <object id="143" x="500" y="280" width="20" height="20"/>
+  <object id="144" x="500" y="300" width="20" height="20"/>
+ </objectgroup>
+ <objectgroup color="#ffffff" id="5" name="exit">
+  <object id="15" x="580" y="120" width="20" height="20"/>
+ </objectgroup>
+ <objectgroup color="#00ff00" id="3" name="player">
+  <object id="2" x="40" y="120" width="20" height="20"/>
+ </objectgroup>
+ <objectgroup color="#0000ff" id="6" name="platforms" locked="1">
+  <object id="122" name="1" x="120" y="140" width="60" height="8"/>
+  <object id="123" name="2" x="300" y="140" width="60" height="8"/>
+  <object id="124" name="3" x="360" y="140" width="60" height="8"/>
+ </objectgroup>
+ <objectgroup id="7" name="platformPaths">
+  <object id="125" name="1" x="120" y="140">
+   <polyline points="0,0 60,0"/>
+  </object>
+  <object id="127" name="2" x="300" y="140">
+   <polyline points="0,0 -60,0"/>
+  </object>
+  <object id="128" name="3" x="360" y="140">
+   <polyline points="0,0 100,0"/>
+  </object>
+ </objectgroup>
+</map>

@@ -106,7 +106,10 @@ class PlayState extends FlxState
 				if (obstaclePathLayer != null) {
 					for (op in obstaclePathLayer.objects) {
 						if (op.name == o.name) {
-							FlxTween.linearPath(newObs, op.points, 100, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+							var newTween:FlxTween = FlxTween.linearPath(newObs, op.points, 100, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+							if (op.properties.contains("startPct")) {
+								newTween.percent = Std.parseFloat(op.properties.get("startPct"));
+							}
 							break;
 						}
 					}
@@ -134,10 +137,20 @@ class PlayState extends FlxState
 				var newPlat:FlxSprite = new FlxSprite(p.x, p.y);
 				newPlat.makeGraphic(60, 8, 0xff000000, true);
 				newPlat.immovable = true;
+				newPlat.allowCollisions = FlxObject.UP;
 				if (platformPathLayer != null) {
 					for (pp in platformPathLayer.objects) {
 						if (pp.name == p.name) {
-							FlxTween.linearPath(newPlat, pp.points, 50, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+							var newTween:FlxTween;
+							if (pp.objectType == TiledObject.POLYGON) {
+								pp.points.push(pp.points[0]);
+								newTween = FlxTween.linearPath(newPlat, pp.points, 50, false, {type:FlxTweenType.LOOPING});
+							} else {
+								newTween = FlxTween.linearPath(newPlat, pp.points, 50, false, {ease:FlxEase.sineInOut, type:FlxTweenType.PINGPONG});
+							}							
+							if (pp.properties.contains("startPct")) {
+								newTween.percent = Std.parseFloat(pp.properties.get("startPct"));
+							}
 							break;
 						}
 					}
@@ -189,7 +202,7 @@ class PlayState extends FlxState
 		}
 		
 		var playerLayer:TiledObjectLayer = getObjectLayer("player");
-		startPoint = new FlxPoint(playerLayer.objects[0].x, playerLayer.objects[0].y);
+		startPoint = new FlxPoint(playerLayer.objects[0].x + 2, playerLayer.objects[0].y + 4);
 		
 		player = new FlxSprite(startPoint.x, startPoint.y);
 		player.loadGraphic("assets/images/slime.png");
@@ -267,7 +280,9 @@ class PlayState extends FlxState
 		}
 		curPlatform = null;
 		
-		FlxG.collide(player, level);
+		if (player.x != startPoint.x || player.y != startPoint.y) { //if left out, player can respawn inside a wall. why is this necessary???
+			FlxG.collide(player, level);
+		}
 		FlxG.collide(player, platforms, function(a:FlxSprite, b:FlxSprite){if (b.isTouching(FlxObject.UP)) {curPlatform = b;}});
 		FlxG.collide(player, obstacles, playerHitSpike);
 		FlxG.overlap(player, exit, exitLevel);
@@ -340,7 +355,6 @@ class PlayState extends FlxState
 			} //end if just pressed down
 		} //end if player alive
 		
-		
 		super.update(elapsed);
 	}
 	
@@ -349,13 +363,16 @@ class PlayState extends FlxState
 		player.acceleration.x = 0;
 		player.velocity.x = 0;
 		player.velocity.y = 0;
+		player.x = startPoint.x;
+		player.y = startPoint.y;
 		livesLeft -= 1;
 		slimeIcons.members[livesLeft].kill();
 		if (livesLeft > 0) {
-			respawnTimer.start(1, function(t:FlxTimer) {
+			respawnTimer.start(0.1, function(t:FlxTimer) {
+				player.revive();
 				player.x = startPoint.x;
 				player.y = startPoint.y;
-				player.revive();
+				player.velocity.y = 0;
 			});
 		} else {
 			respawnTimer.start(1, function(t:FlxTimer) {
