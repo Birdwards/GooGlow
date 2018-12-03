@@ -4,7 +4,7 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.text.FlxBitmapText;
 
-class MenuState extends FlxState {
+class MenuState extends MyState {
 	
 	override public function create():Void
 	{
@@ -32,7 +32,7 @@ class MenuState extends FlxState {
 	override public function update(elapsed:Float):Void
 	{
 		if (FlxG.keys.pressed.ANY) {
-			FlxG.switchState(new PlayState());
+			switchState(new PlayState());
 		}
 		super.update(elapsed);
 	}

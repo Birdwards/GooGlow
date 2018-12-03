@@ -25,7 +25,7 @@ import openfl.display.BitmapDataChannel;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
-class PlayState extends FlxState
+class PlayState extends MyState
 {
 	static var GRAVITY:Float = 500;
 	static var JUMP_VEL:Float = 250;
@@ -375,9 +375,7 @@ class PlayState extends FlxState
 				player.velocity.y = 0;
 			});
 		} else {
-			respawnTimer.start(1, function(t:FlxTimer) {
-				FlxG.resetState();
-			});
+			respawnTimer.start(1, reset);
 		}
 	}
 	
@@ -439,9 +437,7 @@ class PlayState extends FlxState
 			a.kill();
 			if (Reg.curLevel < Reg.NUM_LEVELS) {
 				Reg.curLevel += 1;
-				respawnTimer.start(1, function(t:FlxTimer) {
-					FlxG.resetState();
-				});
+				respawnTimer.start(1, reset);
 			} //todo: else, finish game!
 		}		
 	}

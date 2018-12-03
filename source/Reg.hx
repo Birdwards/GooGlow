@@ -8,6 +8,6 @@ class Reg {
 	public static function init():Void {
 		NUM_LEVELS = 5;
 		
-		curLevel = 5;
+		curLevel = 1;
 	}
 }
