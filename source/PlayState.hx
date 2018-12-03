@@ -444,7 +444,7 @@ class PlayState extends MyState
 	function exitLevel(a:FlxSprite, b:FlxSprite):Void {
 		if (a.x >= b.x && a.x + a.width <= b.x + b.width && a.y >= b.y && a.y + a.height <= b.y + b.height) {
 			Sounds.exit.play();
-			a.kill();
+			a.kill();	
 			if (Reg.curLevel < Reg.NUM_LEVELS) {
 				Reg.curLevel += 1;
 				respawnTimer.start(1, reset);
