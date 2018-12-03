@@ -13,7 +13,7 @@ class Main extends Sprite
 		FlxG.signals.preGameStart.add(Fonts.init);
 		FlxG.signals.preGameStart.add(Reg.init);
 		FlxG.signals.preGameStart.add(Sounds.init);
-		addChild(new FlxGame(640, 360, PlayState, true, true));
+		addChild(new FlxGame(640, 360, MenuState, true, true));
 		
 		FlxG.autoPause = false;
 		FlxG.mouse.useSystemCursor = true;
